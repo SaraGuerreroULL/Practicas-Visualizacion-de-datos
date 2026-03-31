@@ -12,6 +12,7 @@ El repositorio contiene un directorio por práctica, debidamente nombrado. Actua
 
 ```
 Practica_02/
+Práctica_03/
 ```
 ---
 
@@ -42,6 +43,13 @@ Practica_02
     ├── distribucion-renta-canarias.csv
     ├── codislas.csv
     └── nivelestudios.xlsx
+```
+---
+
+## Práctica 03 – Calidad de la visualización: Checks
+
+()
+```
 ```
 ---
 

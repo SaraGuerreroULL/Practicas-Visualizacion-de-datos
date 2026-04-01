@@ -1,13 +1,13 @@
 import pandas as pd
-from dagster import asset, asset_check, AssetCheckResult, MetadataValue
+from dagster import asset, asset_check, AssetCheckResult, MetadataValue, Definitions
 
 @asset
 def islas_raw():
-    df = pd.read_csv("./data/pwbi-1.csv")
+    df = pd.read_csv("Practica_03/data/pwbi-1.csv")
     #EJERCICIO 6
     # Añadimos una fila "sucia" para forzar el fallo del check
-    #fila_sucia = pd.DataFrame({"año": [2022], "isla": ["tenerife"], "medida": ["gasto"], "valor": [1840000]})
-    #return pd.concat([df, fila_sucia], ignore_index=True)
+    # fila_sucia = pd.DataFrame({"año": [2022], "isla": ["tenerife"], "medida": ["gasto"], "valor": [1840000]})
+    # return pd.concat([df, fila_sucia], ignore_index=True)
     return df
 
 @asset_check(asset=islas_raw)

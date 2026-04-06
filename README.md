@@ -63,7 +63,7 @@ Practica_03
 ├── lab_renta_checks.py                    # Checks de calidad asociados a los assets
 │
 ├── data/
-│   ├── pwbi-1.csv                         # Dataset empleado en la práctica
+│   ├── pwbi-1.csv                         # Dataset empleado en el test de la práctica
 │   └── test_checks.py                     # Script de prueba inicial para comprender los checks
 │
 ├── visualizaciones/

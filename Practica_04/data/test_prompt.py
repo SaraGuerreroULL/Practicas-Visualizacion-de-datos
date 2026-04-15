@@ -2,14 +2,14 @@ import re
 import requests
 import pandas as pd
 import subprocess
-
-from dagster import asset, asset_check, Output, AssetCheckResult, MetadataValue
+from pathlib import Path
+from dagster import asset, asset_check, Output, AssetCheckResult, MetadataValue, Definitions
 from plotnine import *
 
 
 @asset
 def islas_raw():
-    df = pd.read_csv("./data/pwbi-1.csv")
+    df = pd.read_csv("Practica_04/data/pwbi-1.csv")
     return Output(
         value=df,
         metadata={
@@ -21,16 +21,23 @@ def islas_raw():
 
 @asset_check(asset=islas_raw)
 def check_estandarizacion_islas(islas_raw):
-    originales = islas_raw["isla"].nunique()
-    normalizadas = islas_raw["isla"].astype(str).str.capitalize().nunique()
+    categorias_originales = sorted(islas_raw["isla"].dropna().astype(str).unique().tolist())
+    categorias_normalizadas = sorted(
+        islas_raw["isla"].dropna().astype(str).str.capitalize().unique().tolist()
+    )
+
+    originales = len(categorias_originales)
+    normalizadas = len(categorias_normalizadas)
 
     passed = originales == normalizadas
 
     return AssetCheckResult(
         passed=passed,
         metadata={
-            "categorias_detectadas": MetadataValue.int(originales),
-            "categorias_esperadas": MetadataValue.int(normalizadas),
+            "No_categorias_detectadas": MetadataValue.int(originales),
+            "categorias_detectadas": MetadataValue.json(categorias_originales),
+            "categorias_normalizadas": MetadataValue.json(categorias_normalizadas),
+            "No_categorias_esperadas": MetadataValue.int(normalizadas),
             "principio_gestalt": "Similitud (evitar fragmentación visual)",
             "mensaje": "Si hay nombres inconsistentes, la leyenda del gráfico puede duplicarse."
         }
@@ -43,18 +50,18 @@ def template_ia(islas_raw):
     islas = sorted(islas_raw["isla"].dropna().astype(str).unique().tolist())
 
     template_tecnico = """
-def generar_plot(df):
-    # Debes devolver un objeto plotnine.
-    # Estructura esperada:
-    # plot = (ggplot(df, aes(...)) + ...)
-    # return plot
-"""
+        def generar_plot(df):
+            # Debes devolver un objeto plotnine.
+            # Estructura esperada:
+            # plot = (ggplot(df, aes(...)) + ... + labs(...) + theme_bw() + theme(...) + ...)
+            # return plot
+        """
 
     system_content = (
         "Eres un experto en gramática de gráficos y Plotnine. "
         "Tu tarea es traducir descripciones en lenguaje natural a código Python ejecutable. "
         "Debes devolver exclusivamente código Python, sin explicaciones, sin markdown y sin bloques ```python. "
-        "No hagas imports. "
+        "No hagas imports, asume que el entorno ya tiene importado plotnine y pandas. "
         "No leas archivos. "
         "No guardes imágenes. "
         "No imprimas nada. "
@@ -62,26 +69,29 @@ def generar_plot(df):
     )
 
     descripcion_grafico = f"""
-Genera código Plotnine para un DataFrame llamado df.
+        Genera código Plotnine para un DataFrame llamado df.
 
-Columnas disponibles: {columnas}
-Categorías detectadas en 'isla': {islas}
+        Columnas disponibles: {columnas}
+        Categorías detectadas en 'isla': {islas}
 
-Requisitos del gráfico:
-- Tipo de gráfico: línea
-- Eje X: 'año'
-- Eje Y: 'valor'
-- Color y group: 'isla'
-- Geometría principal: geom_line()
-- Título: 'Evolución del Gasto por Isla'
-- Etiqueta del eje Y: 'Gasto en €'
-- Resaltar la isla 'Tenerife'
-- El resto de islas deben ir en gris claro (#D3D3D3)
-- Usar scale_color_manual para definir los colores
-- Usar únicamente nombres de columnas existentes
-- La función debe llamarse exactamente generar_plot
-- La función debe recibir df y devolver el gráfico
-"""
+        Requisitos del gráfico:
+        - Tipo de gráfico: línea
+        - Eje X: 'año'
+        - Eje Y: 'valor'
+        - Color y group: 'isla'
+        - Geometría principal: geom_line()
+        - Título: Evolución del Gasto por Isla
+        - Etiqueta del eje X: Año
+        - Etiqueta del eje Y: Gasto en €
+        - Títulos y etiquetas en negrita
+        - Usa scale_color_manual(values=colores)
+        - Debes definir un diccionario dinámico de colores
+        - Resaltar la isla 'Tenerife' en azul, las otras islas en gris
+        - Usa labs(...) correctamente
+        - Usar únicamente nombres de columnas existentes
+        - La función debe llamarse exactamente generar_plot
+        - La función debe recibir df y devolver el gráfico
+        """
 
     user_content = f"Basándote en esta descripción, completa el template:\n{descripcion_grafico}"
 
@@ -186,7 +196,10 @@ def visualizacion_png(context, codigo_generado_ia, islas_raw):
 
         grafico = entorno_ejecucion["generar_plot"](islas_raw)
 
-        ruta_archivo = "visualizacion_ia_1.png"
+
+        output_dir = Path(r"C:\Users\Usuario\Documents\Aaa ULL\Visualización\Practicas-Visualizacion-de-datos\Practica_04\visualizaciones\test")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        ruta_archivo = output_dir / "visualizacion_test_prompt_1.png"
         grafico.save(ruta_archivo, width=10, height=6, dpi=100)
 
         # Automatizar el envío a GitHub desde local
@@ -224,3 +237,17 @@ def check_visualizacion_generada(visualizacion_png):
             "mensaje": "Comprueba que la visualización se ha generado correctamente."
         }
     )
+
+defs = Definitions(
+    assets=[
+        islas_raw,
+        template_ia,
+        codigo_generado_ia,
+        visualizacion_png,
+    ],
+    asset_checks=[
+        check_estandarizacion_islas,
+        check_codigo_generado_ia_valido,
+        check_visualizacion_generada,
+    ]
+)

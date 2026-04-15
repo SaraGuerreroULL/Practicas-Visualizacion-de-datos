@@ -8,11 +8,12 @@ El objetivo general del repositorio es almacenar de forma estructurada el códig
 
 ## Estructura del repositorio
 
-El repositorio contiene un directorio por práctica, debidamente nombrado. Actualmente el repositorio contiene la carpeta:
+El repositorio contiene un directorio por práctica, debidamente nombrado. Actualmente el repositorio contiene las prácticas:
 
 ```
 Practica_02/
 Práctica_03/
+Práctica_04/
 ```
 ---
 
@@ -57,22 +58,57 @@ La estructura del directorio es la siguiente:
 ```
 Practica_03
 │
-├── definitions.py                         # Definición central del proyecto en Dagster
-├── Informe_Práctica03_VD_SaraGuerrero.pdf # Informe de la práctica
-├── lab_renta_assets.py                    # Assets del pipeline principal
-├── lab_renta_checks.py                    # Checks de calidad asociados a los assets
-│
-├── data/
-│   ├── pwbi-1.csv                         # Dataset empleado en el test de la práctica
-│   └── test_checks.py                     # Script de prueba inicial para comprender los checks
-│
 ├── visualizaciones/
 │   ├── graph_01_distribucion_renta.png
 │   ├── graph_02_linea_gomera_sueldos_salarios.png
 │   ├── graph_03_heatmap_palma_desempleo.png
 │   └── graph_04_scatter_palma_salario_educación_2023.png
 │
-└── __pycache__/                           # Archivos generados automáticamente por Python
+├── definitions.py                          # Definición central del proyecto en Dagster
+├── Informe_Práctica03_VD_SaraGuerrero.pdf  # Informe de la práctica
+├── lab_renta_assets.py                     # Assets del pipeline principal
+├── lab_renta_checks.py                     # Checks de calidad asociados a los assets
+│
+└── data/
+    ├── pwbi-1.csv                          # Dataset empleado en el test de la práctica
+    └── test_checks.py                      # Script de prueba inicial para comprender los checks
+
+```
+---
+
+## Práctica 04 – Automatización con generación de código
+
+Esta práctica tuvo como objetivo diseñar un pipeline de datos automatizado capaz de generar visualizaciones de forma dinámica mediante el uso de **inteligencia artificial**, integrando este proceso dentro de un flujo **DataOps orquestado con Dagster**. 
+
+Se abordaron distintos componentes clave: la generación automática de código de visualización a partir de prompts estructurados, la incorporación de visualización geoespacial, la orquestación reactiva mediante sensores y la integración con sistemas de control de versiones para automatizar el despliegue en GitHub. 
+
+La estructura del directorio es la siguiente:
+
+```
+Practica_04
+│
+├── data/
+│   ├── Municipios-2024_geo.json                # Geometría municipal en formato GeoJSON
+│   ├── Municipios-2024_topo.json               # Versión TopoJSON para Power BI
+│   ├── pwbi-1.csv                              # Dataset empleado en el test de la práctica
+│   ├── test_ia.py                              # Script de prueba de conexión con la IA
+│   └── test_prompt.py                          # Pipeline de prueba de generación de código
+│
+├── visualizaciones/
+│   ├── test/
+│   │   └── visualizacion_test_prompt_1.png                     # Resultado del pipeline de prueba
+│   │
+│   ├── graph_04_mapa_municipios_salarios_2015.png              # Resultados del pipeline principal
+│   ├── ia_graph_01_distribucion_renta.png
+│   ├── ia_graph_02_linea_gomera_sueldos_salarios.png
+│   └── ia_graph_03_scatter_palma_salario_educación_2023.png
+│
+│
+├── definitions.py                              # Definición del pipeline en Dagster
+├── ia_lab_renta_assets.py                      # Assets del pipeline con generación por IA
+├── ia_lab_renta_checks.py                      # Validaciones del código y visualizaciones
+├── Informe_Práctica04_VD_SaraGuerrero.pdf      # Informe de la práctica
+└── Práctica04_VZ_SaraGuerrero.pbix             # Dashboard en Power BI
 ```
 ---
 

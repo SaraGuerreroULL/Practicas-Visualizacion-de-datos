@@ -932,7 +932,6 @@ pipeline_proyecto_job = define_asset_job(
 
 @sensor(job=pipeline_proyecto_job)
 def sensor_cambios_datos_renta(context):
-
     archivos_vigilados = [
         DATA_DIR / "actividad-sc-3.csv",
         DATA_DIR / "distribucion-renta-ingresos.csv",
@@ -943,16 +942,20 @@ def sensor_cambios_datos_renta(context):
     estado_actual = {}
 
     for ruta in archivos_vigilados:
-        if os.path.exists(ruta):
-            estado_actual[ruta] = os.path.getmtime(ruta)
+        ruta_str = str(ruta)
+
+        if ruta.exists():
+            estado_actual[ruta_str] = ruta.stat().st_mtime
         else:
-            estado_actual[ruta] = None
+            estado_actual[ruta_str] = None
 
     if estado_actual != estado_anterior:
-        context.update_cursor(json.dumps(estado_actual, ensure_ascii=False))
+        cursor_nuevo = json.dumps(estado_actual, ensure_ascii=False, sort_keys=True)
+        context.update_cursor(cursor_nuevo)
+
         yield RunRequest(
-            run_key=str(estado_actual),
-            run_config={}
+            run_key=cursor_nuevo,
+            run_config={},
         )
     else:
         yield SkipReason("No hubo cambios en los archivos de datos.")
